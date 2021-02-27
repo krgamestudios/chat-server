@@ -1,0 +1,8 @@
+WEB_PORT=3200
+
+DB_HOSTNAME=database
+DB_DATABASE=chat
+DB_USERNAME=chat
+DB_PASSWORD=blastoise
+DB_TIMEZONE=Australia/Sydney
+
