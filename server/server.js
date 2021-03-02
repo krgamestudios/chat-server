@@ -5,10 +5,12 @@ require('dotenv').config();
 const express = require('express');
 const app = express();
 const server = require('http').Server(app);
+const formidable = require('express-formidable');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 
 //config
+app.use(formidable());
 app.use(bodyParser.json());
 app.use(cors());
 

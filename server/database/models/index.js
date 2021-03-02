@@ -1,3 +1,3 @@
 module.exports = {
-	//TODO: models
+	pseudonyms: require('./pseudonyms')
 };
