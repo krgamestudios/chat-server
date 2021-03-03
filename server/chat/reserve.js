@@ -5,6 +5,11 @@ const Op = Sequelize.Op;
 const { pseudonyms } = require('../database/models');
 
 const route = async (req, res) => {
+	//check the key
+	if (req.fields.key != process.env.CHAT_KEY) {
+		return res.status(403).send('Invalid chat key');
+	}
+
 	//generate a UUID to act as a pseudonym (starting with a period)
 	const pseudonym = `.${uuid()}`;
 
@@ -20,7 +25,7 @@ const route = async (req, res) => {
 		pseudonym: pseudonym
 	},{
 		where: {
-			username: req.fields.username
+			username: instance.username
 		}
 	});
 
