@@ -1,5 +1,6 @@
-const { request } = require('express');
 const jwt = require('jsonwebtoken');
+const { chatlog } = require('../database/models');
+const { Op } = require('sequelize');
 
 const chat = io => {
 	io.on('connection', socket => {
@@ -47,6 +48,38 @@ const chat = io => {
 
 			//broadcast to this room
 			socket.broadcast.to(socket.user.room).emit('message', { emphasis: true, text: `${socket.user.username} entered chat` });
+
+			//log
+			chatlog.create({
+				username: socket.user.username,
+				text: `${socket.user.username} entered chat`,
+				room: socket.user.room,
+				emphasis: true
+			});
+
+			//send backlog to the user
+			chatlog.findAll({
+				where: {
+					room: {
+						[Op.eq]: socket.user.room
+					}
+				},
+				order: [
+					['id', 'ASC']
+				]
+			})
+				.then(rows => rows.map(row => row.dataValues))
+				.then(rows => rows.filter(row => {
+					//emphasis and strong don't use usernames
+					return !(row.emphasis || row.strong);
+				}))
+				.then(rows => socket.emit('backlog', rows))
+				.then(() => {
+					//send a # to the user
+					const count = io.sockets.size;
+					socket.emit('message', { emphasis: true, text: count == 1 ? `${count} person in the chat` : `${count} people in the chat` });
+				})
+			;
 		});
 
 		socket.on('message', message => {
@@ -57,6 +90,13 @@ const chat = io => {
 
 			//broadcast to this room
 			socket.broadcast.to(socket.user.room).emit('message', { username: socket.user.username, text: message.text });
+
+			//log
+			chatlog.create({
+				username: socket.user.username,
+				text: message.text,
+				room: socket.user.room
+			});
 		});
 
 		socket.on('disconnect', reason => {
@@ -66,6 +106,14 @@ const chat = io => {
 			}
 
 			socket.broadcast.to(socket.user.room || '.error').emit('message', { emphasis: true, text: `${socket.user.username} left chat` });
+
+			//log
+			chatlog.create({
+				username: socket.user.username,
+				text: `${socket.user.username} left chat`,
+				room: socket.user.room,
+				emphasis: true
+			});
 		});
 	});
 };
@@ -82,14 +130,33 @@ const executeCommand = (socket, command) => {
 			}
 
 			//broadcast to the old room
-			socket.broadcast.to(socket.user.room).emit('message', { emphasis: true, text: `${socket.user.username} left chat` });
+			socket.broadcast.to(socket.user.room).emit('message', { emphasis: true, text: `${socket.user.username} left the room (going to ${room})` });
 
+			//log
+			chatlog.create({
+				username: socket.user.username,
+				text: `${socket.user.username} left the room`,
+				room: socket.user.room,
+				emphasis: true
+			});
+
+			//move
 			socket.leave(socket.user.room);
 			socket.user.room = room;
 			socket.join(socket.user.room);
 
 			//broadcast to the new room
-			socket.broadcast.to(socket.user.room).emit('message', { emphasis: true, text: `${socket.user.username} entered chat` });
+			socket.broadcast.to(socket.user.room).emit('message', { emphasis: true, text: `${socket.user.username} entered the room` });
+
+			//log
+			chatlog.create({
+				username: socket.user.username,
+				text: `${socket.user.username} entered the room`,
+				room: socket.user.room,
+				emphasis: true
+			});
+
+			//update the user
 			socket.emit('message', { emphasis: true, text: `Entered room ${socket.user.room}` });
 			break;
 
@@ -100,6 +167,4 @@ const executeCommand = (socket, command) => {
 
 module.exports = chat;
 
-//TODO: record messages in a database
-//TODO: handle message backlog on connection
 //TODO: add banning and muting controls
