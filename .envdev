@@ -6,3 +6,4 @@ DB_USERNAME=chat
 DB_PASSWORD=blastoise
 DB_TIMEZONE=Australia/Sydney
 
+SECRET_ACCESS=access

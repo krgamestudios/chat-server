@@ -5,6 +5,11 @@ require('dotenv').config();
 const express = require('express');
 const app = express();
 const server = require('http').Server(app);
+const io = require('socket.io')(server, {
+	cors: {
+		origin: '*'
+	}
+});
 const bodyParser = require('body-parser');
 const cors = require('cors');
 
@@ -15,8 +20,8 @@ app.use(cors());
 //database connection
 const database = require('./database');
 
-//access the news
-app.use('/chat', require('./chat'));
+//access the chat
+require('./chat')(io.of('/chat'));
 
 //error on access
 app.get('*', (req, res) => {
