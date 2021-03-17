@@ -229,6 +229,11 @@ const executeCommand = (io, socket, command) => {
 		}
 
 		case '/unmute': {
+			if (socket.user.privilege != 'administrator' && socket.user.privilege != 'moderator') {
+				socket.emit('message', { emphasis: true, text: '/unmute is only available to admins and mods' });
+				break;
+			}
+
 			const arr = command.split(' ');
 			arr.shift(); // /mute
 			const username = arr.shift();
@@ -237,6 +242,9 @@ const executeCommand = (io, socket, command) => {
 				where: {
 					username: {
 						[Op.eq]: username
+					},
+					until: {
+						[Op.gt]: new Date(Date.now())
 					}
 				}
 			});

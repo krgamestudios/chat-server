@@ -8,23 +8,23 @@ TODO: document the chat server setup
 
 # API
 
-TODO: document the chat server api
+This server uses socket.io for communication. Be aware that every chat message requires a valid JWT. See the [auth-server](https://github.com/krgamestudios/auth-server) for details.
 
-socket.io
-
+The event types are as follows:
 
 ```
-on connection -> wait for "create user" event
+Server:
+on 'connection' -> Server waits for "open chat" event to continue
+on 'error' -> Server emits and logs an error
+on 'open chat' -> Preps the server for your messages, places you in the room 'general'
+on 'message' -> Server broadcasts to all other users in your room
+on 'disconnect' -> Server will no longer accept your messages
 
-on create user -> join #general as @username; socket.roomName = 'general'; socket.username = 'username'; accept only JWTs, send "backlog" message
 
-on message -> socket.to(socket.roomName).emit('message'); //scan for commands via middleware
-
-on disconnect -> cleanup etc.
-
-regular user API:
-/join #room -> room is set to #room, join and leave commands are issued (this can also "create" new rooms)
-/whisper @username -> disallow if roomName is different between two users
+Chat Commands:
+/room name -> Move to the room "name"
+/mute username minutes [reason] -> Mutes a specified user for X minutes; only available to admins or mods
+/unmute username - Unmutes the previously muted user; only available to admins or mods
 ```
 
 
