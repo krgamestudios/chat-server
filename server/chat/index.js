@@ -66,7 +66,8 @@ const chat = io => {
 				},
 				order: [
 					['id', 'ASC']
-				]
+				],
+				limit: 50
 			})
 				.then(rows => rows.map(row => row.dataValues))
 				.then(rows => rows.filter(row => {
