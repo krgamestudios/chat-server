@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
-const { chatlog } = require('../database/models');
 const { Op } = require('sequelize');
+const { chatlog, mute } = require('../database/models');
 
 const chat = io => {
 	io.on('connection', socket => {
@@ -51,6 +51,7 @@ const chat = io => {
 
 			//log
 			chatlog.create({
+				notification: true,
 				username: socket.user.username,
 				text: `${socket.user.username} entered chat`,
 				room: socket.user.room,
@@ -61,19 +62,22 @@ const chat = io => {
 			chatlog.findAll({
 				where: {
 					room: {
-						[Op.eq]: socket.user.room
+						[Op.eq]: socket.user.room,
+					},
+					strong: {
+						[Op.ne]: true
+					},
+					emphasis: {
+						[Op.ne]: true
 					}
 				},
 				order: [
-					['id', 'ASC']
+					['id', 'DESC']
 				],
 				limit: 50
 			})
 				.then(rows => rows.map(row => row.dataValues))
-				.then(rows => rows.filter(row => {
-					//emphasis and strong don't use usernames
-					return !(row.emphasis || row.strong);
-				}))
+				.then(rows => rows.reverse())
 				.then(rows => socket.emit('backlog', rows))
 				.then(() => {
 					//send a # to the user
@@ -83,10 +87,26 @@ const chat = io => {
 			;
 		});
 
-		socket.on('message', message => {
+		socket.on('message', async message => {
 			//server commands begin with a '/'
 			if (message.text.startsWith('/')) {
-				return executeCommand(socket, message.text);
+				return executeCommand(io, socket, message.text);
+			}
+
+			const record = await mute.findOne({
+				where: {
+					username: {
+						[Op.eq]: socket.user.username
+					},
+					until: {
+						[Op.gt]: new Date(Date.now())
+					}
+				}
+			});
+
+			if (record) {
+				socket.emit('message', { emphasis: true, text: 'You are currently muted' });
+				return;
 			}
 
 			//broadcast to this room
@@ -110,6 +130,7 @@ const chat = io => {
 
 			//log
 			chatlog.create({
+				notification: true,
 				username: socket.user.username,
 				text: `${socket.user.username} left chat`,
 				room: socket.user.room,
@@ -120,9 +141,9 @@ const chat = io => {
 };
 
 //handle commands
-const executeCommand = (socket, command) => {
+const executeCommand = (io, socket, command) => {
 	switch(command.split(' ')[0]) {
-		case '/room':
+		case '/room': {
 			const room = command.split(' ')[1];
 
 			if (!room) {
@@ -135,6 +156,7 @@ const executeCommand = (socket, command) => {
 
 			//log
 			chatlog.create({
+				notification: true,
 				username: socket.user.username,
 				text: `${socket.user.username} left the room`,
 				room: socket.user.room,
@@ -151,6 +173,7 @@ const executeCommand = (socket, command) => {
 
 			//log
 			chatlog.create({
+				notification: true,
 				username: socket.user.username,
 				text: `${socket.user.username} entered the room`,
 				room: socket.user.room,
@@ -160,12 +183,88 @@ const executeCommand = (socket, command) => {
 			//update the user
 			socket.emit('message', { emphasis: true, text: `Entered room ${socket.user.room}` });
 			break;
+		}
 
-		default:
+		case '/mute': {//NOTE: mutes globally, broadcasts only to admin's room
+			if (socket.user.privilege != 'administrator' && socket.user.privilege != 'moderator') {
+				socket.emit('message', { emphasis: true, text: '/mute is only available to admins and mods' });
+				break;
+			}
+
+			const arr = command.split(' ');
+			arr.shift(); // /mute
+			const username = arr.shift();
+			const minutes = parseInt(arr.shift());
+			const reason = arr.join(' ');
+
+			//check valid command
+			if (!username || !minutes || typeof minutes !== 'number' || minutes < 1) {
+				socket.emit('message', { emphasis: true, text: `format: /mute username minutes [reason]` });
+				break;
+			}
+
+			//upsert
+			const interval = new Date((new Date()).setMinutes((new Date()).getMinutes() + minutes)); //wow
+
+			mute.upsert({
+				username: username,
+				until: interval,
+				reason: reason
+			});
+
+			//broadcast
+			io.to(socket.user.room).emit('message', { strong: true, emphasis: true, text: `${username} has been muted for ${minutes} minute${minutes != 1 ? 's' : ''}${reason ? ': ' : ''}${reason}` });
+
+			//log
+			chatlog.create({
+				notification: true,
+				username: socket.user.username,
+				text: `${username} has been muted for ${minutes} minute${minutes != 1 ? 's' : ''}: ${reason}`,
+				room: socket.user.room,
+				strong: true,
+				emphasis: true
+			});
+
+			break;
+		}
+
+		case '/unmute': {
+			const arr = command.split(' ');
+			arr.shift(); // /mute
+			const username = arr.shift();
+
+			const rowCount = mute.destroy({
+				where: {
+					username: {
+						[Op.eq]: username
+					}
+				}
+			});
+
+			if (rowCount == 0) {
+				socket.emit('message', { emphasis: true, text: 'That user was not muted' });
+				break;
+			}
+
+			//broadcast
+			io.to(socket.user.room).emit('message', { emphasis: true, text: `${username} has been unmuted` });
+
+			//log
+			chatlog.create({
+				notification: true,
+				username: socket.user.username,
+				text: `${username} has been unmuted`,
+				room: socket.user.room,
+				emphasis: true
+			});
+
+			break;
+		}
+
+		default: {
 			socket.emit('message', { emphasis: true, text: 'Unknown command' });
+		}
 	}
 };
 
 module.exports = chat;
-
-//TODO: add banning and muting controls

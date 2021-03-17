@@ -10,6 +10,12 @@ module.exports = sequelize.define('chatlog', {
 		unique: true
 	},
 
+	notification: {
+		type: Sequelize.BOOLEAN,
+		allowNull: false,
+		defaultValue: false
+	},
+
 	username: {
 		type: 'varchar(320)',
 		allowNull: false
@@ -35,5 +41,5 @@ module.exports = sequelize.define('chatlog', {
 		type: Sequelize.BOOLEAN,
 		allowNull: false,
 		defaultValue: false
-	},
+	}
 });
