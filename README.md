@@ -26,13 +26,3 @@ Chat Commands:
 /mute username minutes [reason] -> Mutes a specified user for X minutes; only available to admins or mods
 /unmute username - Unmutes the previously muted user; only available to admins or mods
 ```
-
-
-```
-//user count
-let room = io.sockets.adapter.rooms['my_room'];
-let count = room.length;
-```
-
-https://socket.io/docs/v3/middlewares/
-
