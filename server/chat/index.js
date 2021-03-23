@@ -1,13 +1,13 @@
 const jwt = require('jsonwebtoken');
 const { Op } = require('sequelize');
-const { chatlog, mute } = require('../database/models');
+const { chatlog, mute, reports } = require('../database/models');
 
 const chat = io => {
 	io.on('connection', socket => {
 		//middleware
 		socket.use((request, next) => {
 			//verify request format
-			if (!['open chat', 'message'].includes(request[0])) {
+			if (!['open chat', 'message', 'report'].includes(request[0])) {
 				return next(`Invalid request to the chat server ${request[0]}`);
 			}
 			return next();
@@ -135,6 +135,19 @@ const chat = io => {
 				text: `${socket.user.username} left chat`,
 				room: socket.user.room,
 				emphasis: true
+			});
+		});
+
+		socket.on('report', info => {
+			//handle reports of malicious content
+			if (!info.id) {
+				return;
+			}
+
+			//report
+			reports.create({
+				reporter: socket.user.username,
+				chatlogId: info.id
 			});
 		});
 	});

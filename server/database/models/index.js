@@ -1,4 +1,5 @@
 module.exports = {
 	chatlog: require('./chatlog'),
-	mute: require('./mute')
+	mute: require('./mute'),
+	reports: require('./reports')
 };

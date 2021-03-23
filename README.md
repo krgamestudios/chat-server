@@ -19,6 +19,7 @@ on 'error' -> Server emits and logs an error
 on 'open chat' -> Preps the server for your messages, places you in the room 'general'
 on 'message' -> Server broadcasts to all other users in your room
 on 'disconnect' -> Server will no longer accept your messages
+on 'report' -> Report the chatlog with the index 'id'
 
 
 Chat Commands:
