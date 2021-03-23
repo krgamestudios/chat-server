@@ -109,15 +109,15 @@ const chat = io => {
 				return;
 			}
 
-			//broadcast to this room
-			socket.broadcast.to(socket.user.room).emit('message', { username: socket.user.username, text: message.text });
-
 			//log
-			chatlog.create({
+			const log = await chatlog.create({
 				username: socket.user.username,
 				text: message.text,
 				room: socket.user.room
 			});
+
+			//broadcast to this room (with the id)
+			socket.broadcast.to(socket.user.room).emit('message', log);
 		});
 
 		socket.on('disconnect', reason => {
@@ -199,7 +199,7 @@ const executeCommand = (io, socket, command) => {
 		}
 
 		case '/mute': {//NOTE: mutes globally, broadcasts only to admin's room
-			if (socket.user.privilege != 'administrator' && socket.user.privilege != 'moderator') {
+			if (!socket.user.admin && !socket.user.mod) {
 				socket.emit('message', { emphasis: true, text: '/mute is only available to admins and mods' });
 				break;
 			}
@@ -242,7 +242,7 @@ const executeCommand = (io, socket, command) => {
 		}
 
 		case '/unmute': {
-			if (socket.user.privilege != 'administrator' && socket.user.privilege != 'moderator') {
+			if (!socket.user.admin && !socket.user.mod) {
 				socket.emit('message', { emphasis: true, text: '/unmute is only available to admins and mods' });
 				break;
 			}
