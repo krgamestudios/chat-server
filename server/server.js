@@ -20,6 +20,9 @@ app.use(cors());
 //database connection
 const database = require('./database');
 
+//admin stuff
+app.use('/admin', require('./admin'));
+
 //access the chat
 require('./chat')(io.of('/chat'));
 

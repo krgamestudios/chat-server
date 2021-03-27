@@ -19,5 +19,6 @@ const reports = sequelize.define('reports', {
 });
 
 chatlog.hasMany(reports, { foreignKey: 'chatlogId', foreignKeyConstraint: true });
+reports.belongsTo(chatlog, { foreignKey: 'chatlogId' });
 
 module.exports = reports;
