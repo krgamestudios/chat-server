@@ -1,5 +1,5 @@
 {
-  "name": "chat-server",
+  "name": "03-chat",
   "version": "1.0.0",
   "description": "An API centric chat server. Uses Sequelize and mariaDB by default.",
   "main": "server/server.js",
@@ -13,14 +13,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/krgamestudios/chat-server.git"
+    "url": "https://gitea.krgamestudios.com/krgamestudios/03-chat.git"
   },
   "author": "Kayne Ruse",
   "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/krgamestudios/chat-server/issues"
-  },
-  "homepage": "https://github.com/krgamestudios/chat-server#readme",
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
