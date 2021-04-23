@@ -4,7 +4,7 @@ const sequelize = require('..');
 const chatlog = require('./chatlog');
 
 const reports = sequelize.define('reports', {
-	id: {
+	index: {
 		type: Sequelize.INTEGER(11),
 		allowNull: false,
 		autoIncrement: true,
@@ -18,7 +18,9 @@ const reports = sequelize.define('reports', {
 	},
 });
 
-chatlog.hasMany(reports, { foreignKey: 'chatlogId', foreignKeyConstraint: true });
-reports.belongsTo(chatlog, { foreignKey: 'chatlogId' });
+chatlog.hasMany(reports, { foreignKey: 'chatlogIndex', foreignKeyConstraint: true });
+reports.belongsTo(chatlog, { foreignKey: 'chatlogIndex' });
+
+sequelize.sync();
 
 module.exports = reports;

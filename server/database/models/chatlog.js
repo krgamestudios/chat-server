@@ -2,7 +2,7 @@ const Sequelize = require('sequelize');
 const sequelize = require('..');
 
 module.exports = sequelize.define('chatlog', {
-	id: {
+	index: {
 		type: Sequelize.INTEGER(11),
 		allowNull: false,
 		autoIncrement: true,

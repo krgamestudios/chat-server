@@ -7,14 +7,14 @@ const route = async (req, res) => {
 			model: chatlog,
 			required: true
 		}],
-		order: ['chatlogId']
+		order: ['chatlogIndex']
 	});
 
 	//collate
 	const response = [];
 	for(let i = 0; i < reps.length; i++) {
 		//new chatlog
-		if (response.length == 0 || response[response.length - 1].chatlogId != reps[i].chatlogId) {
+		if (response.length == 0 || response[response.length - 1].chatlogIndex != reps[i].chatlogIndex) {
 			response.push(reps[i]);
 			response[response.length - 1].reporter = [response[response.length - 1].reporter]; //reporters in an array
 			continue;
