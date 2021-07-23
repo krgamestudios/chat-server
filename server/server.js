@@ -10,11 +10,10 @@ const io = require('socket.io')(server, {
 		origin: '*'
 	}
 });
-const bodyParser = require('body-parser');
 const cors = require('cors');
 
 //config
-app.use(bodyParser.json());
+app.use(express.json());
 app.use(cors());
 
 //database connection

@@ -1,0 +1,10 @@
+.git*
+
+tools*
+mysql*
+letsencrypt*
+test*
+
+.env*
+.github*
+LICENSE*

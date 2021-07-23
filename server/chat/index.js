@@ -72,7 +72,7 @@ const chat = io => {
 					}
 				},
 				order: [
-					['id', 'DESC']
+					['index', 'DESC']
 				],
 				limit: 50
 			})
@@ -140,14 +140,14 @@ const chat = io => {
 
 		socket.on('report', info => {
 			//handle reports of malicious content
-			if (!info.id) {
+			if (!info.index) {
 				return;
 			}
 
 			//report
 			reports.create({
 				reporter: socket.user.username,
-				chatlogId: info.id
+				chatlogIndex: info.index
 			});
 		});
 	});

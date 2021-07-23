@@ -4,7 +4,7 @@ const { chatlog, reports } = require('../database/models');
 const route = async (req, res) => {
 	const reps = await reports.destroy({
 		where: {
-			chatlogId: req.body.chatlogId
+			chatlogIndex: req.body.chatlogIndex
 		}
 	});
 
