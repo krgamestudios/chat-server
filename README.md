@@ -6,9 +6,28 @@ An API centric chat server. Uses Sequelize and mariaDB by default.
 
 There are multiple ways to run this app - it can run on it's own via `npm start` (for production) or `npm run dev` (for development). it can also run inside docker using `docker-compose up --build` - run `node configure-script.js` to generate docker-compose.yml and startup.sql.
 
+To generate an authorization token, use [auth-server](https://github.com/krgamestudios/auth-server). A public-facing development auth-server is available here (tokens are valid for 10 minutes):
+
+```
+POST https://dev-auth.krgamestudios.com/auth/login HTTP/1.1
+Content-Type: application/json
+
+{
+	"email": "kayneruse@gmail.com",
+	"password": "helloworld"
+}
+```
+
 # API
 
-This server uses socket.io for communication. Be aware that every chat message requires a valid JWT. See the [auth-server](https://github.com/krgamestudios/auth-server) for details.
+This server uses socket.io for communication. Be aware that every 'open chat', 'message' and 'report' signal requires a valid JWT, as part of the message:
+
+```js
+socket.emit('message', {
+	accessToken,
+	text: inputRef.current.value
+});
+```
 
 The event types are as follows:
 
