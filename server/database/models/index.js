@@ -1,5 +1,12 @@
+const chatlog = require('./chatlog');
+const mute = require('./mute');
+const reports = require('./reports');
+
+//relationships
+reports.belongsTo(chatlog);
+
 module.exports = {
-	chatlog: require('./chatlog'),
-	mute: require('./mute'),
-	reports: require('./reports')
+	chatlog,
+	mute,
+	reports,
 };
