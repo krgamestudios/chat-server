@@ -33,7 +33,7 @@ const question = (prompt, def = null) => {
 	const appPort = await question('App Port', '3300');
 
 	const appDBUser = await question('DB User', appName);
-	const appDBPass = await question('DB Pass', uuid());
+	const appDBPass = await question('DB Pass', 'blastoise');
 	const dbRootPass = await question('DB Root Pass');
 
 	const appSecretAccess = await question('Access Token Secret', uuid(32));
