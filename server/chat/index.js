@@ -46,17 +46,17 @@ const chat = io => {
 
 			socket.join(socket.user.room);
 
-			//broadcast to this room
-			socket.broadcast.to(socket.user.room).emit('message', {timestamp: log.createdAt, emphasis: true, text: `${socket.user.username} entered chat` });
-
 			//log
-			chatlog.create({
+			const log = await chatlog.create({
 				notification: true,
 				username: socket.user.username,
 				text: `${socket.user.username} entered chat`,
 				room: socket.user.room,
 				emphasis: true
 			});
+
+			//broadcast to this room
+			socket.broadcast.to(socket.user.room).emit('message', {timestamp: log.createdAt, emphasis: true, text: `${socket.user.username} entered chat` });
 
 			//send backlog to the user
 			chatlog.findAll({
@@ -129,7 +129,7 @@ const chat = io => {
 			socket.broadcast.to(socket.user.room || '.error').emit('message', { emphasis: true, text: `${socket.user.username} left chat` });
 
 			//log
-			chatlog.create({
+			const log = await chatlog.create({
 				notification: true,
 				username: socket.user.username,
 				text: `${socket.user.username} left chat`,
@@ -164,11 +164,8 @@ const executeCommand = (io, socket, command) => {
 				break;
 			}
 
-			//broadcast to the old room
-			socket.broadcast.to(socket.user.room).emit('message', { emphasis: true, text: `${socket.user.username} left the room (going to ${room})` });
-
 			//log
-			chatlog.create({
+			const log = await chatlog.create({
 				notification: true,
 				username: socket.user.username,
 				text: `${socket.user.username} left the room`,
@@ -176,22 +173,25 @@ const executeCommand = (io, socket, command) => {
 				emphasis: true
 			});
 
+			//broadcast to the old room
+			socket.broadcast.to(socket.user.room).emit('message', {	timestamp: log.createdAt, emphasis: true, text: `${socket.user.username} left the room (going to ${room})` });
+
 			//move
 			socket.leave(socket.user.room);
 			socket.user.room = room;
 			socket.join(socket.user.room);
 
-			//broadcast to the new room
-			socket.broadcast.to(socket.user.room).emit('message', { emphasis: true, text: `${socket.user.username} entered the room` });
-
 			//log
-			chatlog.create({
+			const log = await chatlog.create({
 				notification: true,
 				username: socket.user.username,
 				text: `${socket.user.username} entered the room`,
 				room: socket.user.room,
 				emphasis: true
 			});
+
+			//broadcast to the new room
+			socket.broadcast.to(socket.user.room).emit('message', {timestamp: log.createdAt, emphasis: true, text: `${socket.user.username} entered the room` });
 
 			//update the user
 			socket.emit('message', {timestamp: log.createdAt, emphasis: true, text: `Entered room ${socket.user.room}` });
@@ -224,12 +224,9 @@ const executeCommand = (io, socket, command) => {
 				until: interval,
 				reason: reason
 			});
-
-			//broadcast
-			io.to(socket.user.room).emit('message', { strong: true, emphasis: true, text: `${username} has been muted for ${minutes} minute${minutes != 1 ? 's' : ''}${reason ? ': ' : ''}${reason}` });
-
+			
 			//log
-			chatlog.create({
+			const log = await chatlog.create({
 				notification: true,
 				username: socket.user.username,
 				text: `${username} has been muted for ${minutes} minute${minutes != 1 ? 's' : ''}: ${reason}`,
@@ -237,6 +234,9 @@ const executeCommand = (io, socket, command) => {
 				strong: true,
 				emphasis: true
 			});
+
+			//broadcast
+			io.to(socket.user.room).emit('message', { timestamp: log.createdAt, strong: true, emphasis: true, text: `${username} has been muted for ${minutes} minute${minutes != 1 ? 's' : ''}${reason ? ': ' : ''}${reason}` });
 
 			break;
 		}
@@ -267,17 +267,17 @@ const executeCommand = (io, socket, command) => {
 				break;
 			}
 
-			//broadcast
-			io.to(socket.user.room).emit('message', { emphasis: true, text: `${username} has been unmuted` });
-
 			//log
-			chatlog.create({
+			const log = await chatlog.create({
 				notification: true,
 				username: socket.user.username,
 				text: `${username} has been unmuted`,
 				room: socket.user.room,
 				emphasis: true
 			});
+
+			//broadcast
+			io.to(socket.user.room).emit('message', {timestamp: log.createdAt, emphasis: true, text: `${username} has been unmuted` });
 
 			break;
 		}
