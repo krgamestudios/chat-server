@@ -35,7 +35,7 @@ const chat = io => {
 		});
 
 		//from here, handles all normal messages
-		socket.on('open chat', message => {
+		socket.on('open chat', async message => {
 			//handle rooms - only in a room if you've opened chat
 			const newlyOpened = !socket.user.room;
 			socket.user.room = socket.user.room || 'general'; //default to general
@@ -120,7 +120,7 @@ const chat = io => {
 			socket.broadcast.to(socket.user.room).emit('message', log);
 		});
 
-		socket.on('disconnect', reason => {
+		socket.on('disconnect', async reason => {
 			//broadcast to this room
 			if (!socket.user) {
 				return;
