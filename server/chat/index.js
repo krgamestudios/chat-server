@@ -35,7 +35,7 @@ const chat = io => {
 		});
 
 		//from here, handles all normal messages
-		socket.on('open chat', message => {
+		socket.on('open chat', async message => {
 			//handle rooms - only in a room if you've opened chat
 			const newlyOpened = !socket.user.room;
 			socket.user.room = socket.user.room || 'general'; //default to general
@@ -46,17 +46,17 @@ const chat = io => {
 
 			socket.join(socket.user.room);
 
-			//broadcast to this room
-			socket.broadcast.to(socket.user.room).emit('message', { emphasis: true, text: `${socket.user.username} entered chat` });
-
 			//log
-			chatlog.create({
+			const log = await chatlog.create({
 				notification: true,
 				username: socket.user.username,
 				text: `${socket.user.username} entered chat`,
 				room: socket.user.room,
 				emphasis: true
 			});
+
+			//broadcast to this room
+			socket.broadcast.to(socket.user.room).emit('message', {timestamp: log.createdAt, emphasis: true, text: `${socket.user.username} entered chat` });
 
 			//send backlog to the user
 			chatlog.findAll({
@@ -120,7 +120,7 @@ const chat = io => {
 			socket.broadcast.to(socket.user.room).emit('message', log);
 		});
 
-		socket.on('disconnect', reason => {
+		socket.on('disconnect', async reason => {
 			//broadcast to this room
 			if (!socket.user) {
 				return;
