@@ -15,7 +15,7 @@ POST https://dev-auth.krgamestudios.com/auth/login HTTP/1.1
 Content-Type: application/json
 
 {
-	"email": "kayneruse@gmail.com",
+	"email": "example@example.com",
 	"password": "helloworld"
 }
 ```
