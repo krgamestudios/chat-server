@@ -30,6 +30,7 @@ const question = (prompt, def = null) => {
 	//project configuration
 	const appName = await question('App Name', 'chat');
 	const appWebAddress = await question('Web Addr', `${appName}.example.com`);
+	const appWebOrigin = await question('Web Origin', `https://example.com`); //TODO: clean these up properly
 	const appPort = await question('App Port', '3300');
 
 	const appDBUser = await question('DB User', appName);
@@ -59,6 +60,7 @@ services:
       - "traefik.http.services.${appName}service.loadbalancer.server.port=${appPort}"
     environment:
       - WEB_PORT=${appPort}
+      - WEB_ORIGIN=${appWebOrigin}
       - DB_HOSTNAME=database
       - DB_DATABASE=${appName}
       - DB_USERNAME=${appDBUser}

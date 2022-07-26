@@ -1,5 +1,7 @@
 WEB_PORT=3300
 
+WEB_ORIGIN=http://localhost:3001
+
 DB_HOSTNAME=database
 DB_DATABASE=chat
 DB_USERNAME=chat
