@@ -1,6 +1,6 @@
 {
   "name": "chat-server",
-  "version": "1.4.5",
+  "version": "1.4.6",
   "description": "An API centric chat server. Uses Sequelize and mariaDB by default.",
   "main": "server/server.js",
   "scripts": {
