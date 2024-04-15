@@ -3,6 +3,8 @@ WEB_PORT=3300
 WEB_ORIGIN=http://localhost:3001
 
 DB_HOSTNAME=localhost
+DB_PORTNAME=3306
+
 DB_DATABASE=chat
 DB_USERNAME=chat
 DB_PASSWORD=blastoise

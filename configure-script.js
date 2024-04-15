@@ -33,6 +33,25 @@ const question = (prompt, def = null) => {
 	const appWebOrigin = await question('Web Origin', `https://example.com`); //TODO: clean these up properly
 	const appPort = await question('App Port', '3300');
 
+  //configure the database address
+  let dbLocation = '';
+  while (typeof dbLocation != 'string' || /^[le]/i.test(dbLocation[0]) == false) {
+    dbLocation = await question('[l]ocal or [e]xternal database?');
+  }
+
+  let appDBHost = '';
+  let appDBPort = '';
+
+  if (/^[l]/i.test(dbLocation[0])) {
+    appDBHost = 'database';
+    appDBPort = '3306';
+  }
+  else {
+    appDBHost = await question('DB Host');
+    appDBPort = await question('DB Port', '3306');
+  }
+
+  //configure the database account
 	const appDBUser = await question('DB User', appName);
 	const appDBPass = await question('DB Pass', 'blastoise');
 	const dbRootPass = await question('DB Root Pass');
@@ -61,20 +80,22 @@ services:
     environment:
       - WEB_PORT=${appPort}
       - WEB_ORIGIN=${appWebOrigin}
-      - DB_HOSTNAME=database
+      - DB_HOSTNAME=${appDBHost}
+      - DB_PORTNAME=${appDBPort}
       - DB_DATABASE=${appName}
       - DB_USERNAME=${appDBUser}
       - DB_PASSWORD=${appDBPass}
       - DB_TIMEZONE=Australia/Sydney
       - SECRET_ACCESS=${appSecretAccess}
     networks:
-      - app-network
+      - app-network${ appDBHost != 'database' ? '' : `
     depends_on:
       - database
   database:
     image: mariadb:latest
     environment:
       MYSQL_DATABASE: ${appName}
+      MYSQL_TCP_PORT: ${appDBPort}
       MYSQL_USER: ${appDBUser}
       MYSQL_PASSWORD: ${appDBPass}
       MYSQL_ROOT_PASSWORD: ${dbRootPass}
@@ -82,7 +103,7 @@ services:
       - app-network
     volumes:
       - ./mysql:/var/lib/mysql
-      - ./startup.sql:/docker-entrypoint-initdb.d/startup.sql:ro
+      - ./startup.sql:/docker-entrypoint-initdb.d/startup.sql:ro`}
   traefik_${appName}:
     container_name: ${appName}_traefik
     image: "traefik:v2.10"
