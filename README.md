@@ -6,7 +6,7 @@ This server is available via docker hub at krgamestudios/chat-server.
 
 # Setup
 
-There are multiple ways to run this app - it can run on it's own via `npm start` (for production) or `npm run dev` (for development). it can also run inside docker using `docker-compose up --build` - run `node configure-script.js` to generate docker-compose.yml and startup.sql.
+There are multiple ways to run this app - it can run on it's own via `npm start` (for production) or `npm run dev` (for development). it can also run inside docker using `docker compose up --build` - run `node configure-script.js` to generate docker-compose.yml and startup.sql.
 
 To generate an authorization token, use [auth-server](https://github.com/krgamestudios/auth-server). A public-facing development auth-server is available here (tokens are valid for 10 minutes):
 
