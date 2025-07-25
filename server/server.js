@@ -31,7 +31,7 @@ app.use('/admin', require('./admin'));
 require('./chat')(io.of('/chat'));
 
 //error on access
-app.get('*', (req, res) => {
+app.get('/{*any}', (req, res) => {
 	res.redirect('https://github.com/krgamestudios/chat-server');
 });
 
